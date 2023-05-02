@@ -29,11 +29,13 @@ runs:
       run: |
         echo "::error title=⛔ error hint::directory empty, Maybe you need to populate it in the Secrets for your workflow, see more in https://docs.github.com/en/actions/security-guides/encrypted-secrets"
         exit 1
-    - run: |
+    - name: compress and upload
+      shell: sh
+      run: |
         tar cjvf - -C "$GITHUB_WORKSPACE" "$DIRECTORY" | ssh -o StrictHostKeyChecking=no "$REMOTE_HOST" "cd $REMOTE_DESTINATION && tar -xjvf -"
-        shell: sh
     - name: execute a post upload command if specified
       if: ${{ inputs.post_upload_command }}
+      shell: sh
       run: |
         echo "Upload post command specified, runnig. $POST_UPLOAD_COMMAND"
         ssh -o StrictHostKeyChecking=no "$REMOTE_HOST" "eval $POST_UPLOAD_COMMAND"
