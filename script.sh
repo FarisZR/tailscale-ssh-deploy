@@ -11,11 +11,8 @@ if [ -z "$DIRECTORY" ]; then
     exit 1
 fi
 
-echo "Add known hosts"
 mkdir -p ~/.ssh
 eval $(ssh-agent)
-ssh-keyscan "$SSH_HOST" >> ~/.ssh/known_hosts
-ssh-keyscan "$SSH_HOST" >> /etc/ssh/ssh_known_hosts
 
 tar cjvf - -C "$GITHUB_WORKSPACE" "$DIRECTORY" | ssh -o StrictHostKeyChecking=no "$REMOTE_HOST" "cd $REMOTE_DESTINATION && tar -xjvf -"
 echo "Upload finished"
