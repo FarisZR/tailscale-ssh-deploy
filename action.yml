@@ -3,42 +3,42 @@ author: FarisZR
 description: Deploy files with a custom command using Tailscale SSH
 inputs:
   remote_host:
-    description: Remote host ie (user@host)
-    required: true
-  post_upload_command:
-    description: sets command to run post upload
-    required: false
-  directory:
-    description: specifies which directory to upload
+    description: 'The remote host to upload the directory to'
     required: true
   remote_destination:
-    description: directory to upload into
-    default: "./"
+    description: 'The destination path on the remote host'
+    required: true
+  directory:
+    description: 'The local directory to upload'
+    required: true
+  post_upload_command:
+    description: 'A command to run on the remote host after the upload is finished'
+    required: false
 runs:
-  using: composite
+  using: 'composite'
   steps:
-    - name: Check remote_host Empty
-      if: ${{ inputs.remote_host == '' }}
+    - run: |
+        #!/bin/sh
+        set -eu
+        
+        if [ -z "${{ inputs.remote_host }}" ]; then
+            echo "Input remote_host is required!"
+            exit 1
+        fi
+        
+        if [ -z "${{ inputs.directory }}" ]; then
+            echo "Input directory is required!"
+            exit 1
+        fi
+        
+        tar cjvf - -C "$GITHUB_WORKSPACE" "${{ inputs.directory }}" | ssh -o StrictHostKeyChecking=no "${{ inputs.remote_host }}" "cd ${{ inputs.remote_destination }} && tar -xjvf -"
+        echo "Upload finished"
+        if [ -n "${{ inputs.post_upload_command }}" ];
+            then
+            echo "Upload post command specified, runnig. ${{ inputs.post_upload_command }}"
+            ssh -o StrictHostKeyChecking=no "${{ inputs.remote_host }}" "eval ${{ inputs.post_upload_command }}"
+        fi
       shell: bash
-      run: |
-        echo "::error title=⛔ error hint::remote_host empty, Maybe you need to populate it in the Secrets for your workflow, see more in https://docs.github.com/en/actions/security-guides/encrypted-secrets"
-        exit 1
-    - name: Check directory Empty
-      if: ${{ inputs.directory == '' }}
-      shell: bash
-      run: |
-        echo "::error title=⛔ error hint::directory empty, Maybe you need to populate it in the Secrets for your workflow, see more in https://docs.github.com/en/actions/security-guides/encrypted-secrets"
-        exit 1
-    - name: compress and upload
-      shell: sh
-      run: |
-        tar cjvf - -C "$GITHUB_WORKSPACE" "$DIRECTORY" | ssh -o StrictHostKeyChecking=no "$REMOTE_HOST" "cd $REMOTE_DESTINATION && tar -xjvf -"
-    - name: execute a post upload command if specified
-      if: ${{ inputs.post_upload_command }}
-      shell: sh
-      run: |
-        echo "Upload post command specified, runnig. $POST_UPLOAD_COMMAND"
-        ssh -o StrictHostKeyChecking=no "$REMOTE_HOST" "eval $POST_UPLOAD_COMMAND"
 
 branding:
   icon: terminal
