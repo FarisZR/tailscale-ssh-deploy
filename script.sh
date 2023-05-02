@@ -17,7 +17,7 @@ eval $(ssh-agent)
 ssh-keyscan "$SSH_HOST" >> ~/.ssh/known_hosts
 ssh-keyscan "$SSH_HOST" >> /etc/ssh/ssh_known_hosts
 
-tar cjvf - -C "$GITHUB_WORKSPACE" "$DIRECTORY" | ssh -o StrictHostKeyChecking=no "$REMOTE_HOST" 'tar -xjvf -'
+tar cjvf - -C "$GITHUB_WORKSPACE" "$DIRECTORY" | ssh -o StrictHostKeyChecking=no "$REMOTE_HOST" "cd $REMOTE_DESTINATION && tar -xjvf -"
 echo "Upload finished"
 if [ -n "$POST_UPLOAD_COMMAND" ];
     then

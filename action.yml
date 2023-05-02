@@ -11,6 +11,9 @@ inputs:
   directory:
     description: specifies which directory to upload
     required: true
+  remote_destination:
+    description: directory to upload into
+    default: "./"
 runs:
   using: composite
   steps:
