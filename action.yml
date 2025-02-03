@@ -35,7 +35,7 @@ runs:
         echo "Upload finished"
         if [ -n "${{ inputs.post_upload_command }}" ];
             then
-            echo "Upload post command specified, runnig. ${{ inputs.post_upload_command }}"
+            echo "Upload post command specified, running now. ${{ inputs.post_upload_command }}"
             ssh -o StrictHostKeyChecking=no "${{ inputs.remote_host }}" "eval ${{ inputs.post_upload_command }}"
         fi
       shell: bash
